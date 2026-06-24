@@ -26,64 +26,84 @@ export default function TransactionsPage() {
   const items = data?.items ?? []
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-slate-800">Transactions</h1>
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-xl font-semibold text-slate-100">Transactions</h1>
+        <p className="text-xs text-slate-600 mt-0.5">{total > 0 ? `${total} records` : 'No data yet'}</p>
+      </div>
 
       {/* Filters */}
       <div className="card">
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-4">
           <div>
             <label className="label">From</label>
-            <input type="date" className="input" value={from} onChange={(e) => { setFrom(e.target.value); setOffset(0) }} />
+            <input type="date" className="input w-36 text-xs" value={from}
+              onChange={(e) => { setFrom(e.target.value); setOffset(0) }} />
           </div>
           <div>
             <label className="label">To</label>
-            <input type="date" className="input" value={to} onChange={(e) => { setTo(e.target.value); setOffset(0) }} />
+            <input type="date" className="input w-36 text-xs" value={to}
+              onChange={(e) => { setTo(e.target.value); setOffset(0) }} />
           </div>
           <div>
             <label className="label">Category</label>
-            <input
-              type="text"
-              className="input"
-              placeholder="e.g. Food & Dining"
-              value={category}
-              onChange={(e) => { setCategory(e.target.value); setOffset(0) }}
-            />
+            <input type="text" className="input w-44 text-xs" placeholder="e.g. Food & Dining"
+              value={category} onChange={(e) => { setCategory(e.target.value); setOffset(0) }} />
           </div>
+          {(from || to || category) && (
+            <div className="self-end">
+              <button
+                className="btn-ghost text-xs"
+                onClick={() => { setFrom(''); setTo(''); setCategory(''); setOffset(0) }}
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="card overflow-x-auto p-0">
+      <div className="card overflow-hidden p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100">
-              <th className="text-left px-4 py-3 text-slate-500 font-medium">Date</th>
-              <th className="text-left px-4 py-3 text-slate-500 font-medium">Merchant</th>
-              <th className="text-left px-4 py-3 text-slate-500 font-medium">Category</th>
-              <th className="text-right px-4 py-3 text-slate-500 font-medium">Amount</th>
+            <tr className="border-b border-white/[0.05]">
+              <th className="text-left px-4 py-3 text-[10px] font-medium text-slate-600 uppercase tracking-widest">Date</th>
+              <th className="text-left px-4 py-3 text-[10px] font-medium text-slate-600 uppercase tracking-widest">Merchant</th>
+              <th className="text-left px-4 py-3 text-[10px] font-medium text-slate-600 uppercase tracking-widest">Category</th>
+              <th className="text-right px-4 py-3 text-[10px] font-medium text-slate-600 uppercase tracking-widest">Amount</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/[0.03]">
             {isLoading ? (
               <tr>
-                <td colSpan={4} className="text-center py-10 text-slate-400">Loading…</td>
+                <td colSpan={4} className="text-center py-12 text-slate-600 text-xs">
+                  <svg className="w-5 h-5 animate-spin text-cyan-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                  </svg>
+                  Loading transactions…
+                </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center py-10 text-slate-400">No transactions found</td>
+                <td colSpan={4} className="text-center py-12 text-slate-600 text-xs">No transactions found</td>
               </tr>
             ) : (
               items.map((t: any) => (
-                <tr key={t.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{t.txn_date}</td>
-                  <td className="px-4 py-3 text-slate-800 max-w-xs truncate">{t.merchant_norm || t.description || '—'}</td>
+                <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap">{t.txn_date}</td>
+                  <td className="px-4 py-3 text-xs text-slate-300 max-w-xs truncate">
+                    {t.merchant_norm || t.description || '—'}
+                  </td>
                   <td className="px-4 py-3">
-                    <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">
+                    <span className="badge-blue text-[10px]">
                       {t.category_name || 'Uncategorized'}
                     </span>
                   </td>
-                  <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${t.direction === 'credit' ? 'text-green-600' : 'text-slate-800'}`}>
+                  <td className={`px-4 py-3 text-right font-mono text-xs font-medium whitespace-nowrap ${
+                    t.direction === 'credit' ? 'text-emerald-400' : 'text-slate-300'
+                  }`}>
                     {t.direction === 'credit' ? '+' : ''}{fmt(Number(t.amount))}
                   </td>
                 </tr>
@@ -92,26 +112,19 @@ export default function TransactionsPage() {
           </tbody>
         </table>
 
-        {/* Pagination */}
         {total > PAGE_SIZE && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
-            <span className="text-xs text-slate-400">
-              Showing {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
+          <div className="flex items-center justify-between px-4 py-3 border-t border-white/[0.05]">
+            <span className="text-[10px] text-slate-600 font-mono">
+              {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
             </span>
             <div className="flex gap-2">
-              <button
-                className="btn-secondary text-xs py-1 px-3"
-                disabled={offset === 0}
-                onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
-              >
-                Previous
+              <button className="btn-secondary text-xs py-1 px-3" disabled={offset === 0}
+                onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}>
+                ← Prev
               </button>
-              <button
-                className="btn-secondary text-xs py-1 px-3"
-                disabled={offset + PAGE_SIZE >= total}
-                onClick={() => setOffset(offset + PAGE_SIZE)}
-              >
-                Next
+              <button className="btn-secondary text-xs py-1 px-3" disabled={offset + PAGE_SIZE >= total}
+                onClick={() => setOffset(offset + PAGE_SIZE)}>
+                Next →
               </button>
             </div>
           </div>

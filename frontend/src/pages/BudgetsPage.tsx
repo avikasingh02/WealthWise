@@ -38,26 +38,29 @@ export default function BudgetsPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">Budgets</h1>
-        <div className="flex gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-100">Budgets</h1>
+          <p className="text-xs text-slate-600 mt-0.5">Set and track monthly spending limits</p>
+        </div>
+        <div className="flex gap-2">
           <input
             type="month"
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="input w-40"
+            className="input w-36 text-xs"
           />
-          <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+          <button className="btn-primary text-xs" onClick={() => setShowForm(!showForm)}>
             + New budget
           </button>
         </div>
       </div>
 
       {showForm && (
-        <div className="card">
-          <h3 className="font-semibold text-slate-700 mb-4">Add budget</h3>
-          <div className="space-y-3">
+        <div className="card border border-cyan-500/20">
+          <p className="text-sm font-medium text-slate-300 mb-4">Add budget</p>
+          <div className="space-y-4">
             <div>
               <label className="label">Category ID</label>
               <input
@@ -66,9 +69,7 @@ export default function BudgetsPage() {
                 value={catId}
                 onChange={(e) => setCatId(e.target.value)}
               />
-              <p className="text-xs text-slate-400 mt-1">
-                Find category IDs in the transactions list
-              </p>
+              <p className="text-[10px] text-slate-600 mt-1">Find category IDs in the transactions list</p>
             </div>
             <div>
               <label className="label">Monthly limit (₹)</label>
@@ -80,31 +81,35 @@ export default function BudgetsPage() {
                 onChange={(e) => setLimit(e.target.value)}
               />
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
-                className="btn-primary"
+                className="btn-primary text-xs"
                 onClick={() => createMut.mutate()}
                 disabled={!catId || !limit || createMut.isLoading}
               >
                 {createMut.isLoading ? 'Saving…' : 'Save budget'}
               </button>
-              <button className="btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+              <button className="btn-secondary text-xs" onClick={() => setShowForm(false)}>Cancel</button>
             </div>
             {createMut.isError && (
-              <p className="text-red-500 text-sm">Failed to create budget. Check the category ID.</p>
+              <p className="text-xs text-red-400">Failed to create budget. Check the category ID.</p>
             )}
           </div>
         </div>
       )}
 
       {budgets.length === 0 ? (
-        <div className="card text-center py-12">
-          <div className="text-4xl mb-3">🎯</div>
-          <p className="font-semibold text-slate-700">No budgets for {period}</p>
-          <p className="text-slate-400 text-sm mt-1">Create a budget to track your spending</p>
+        <div className="card text-center py-16">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-space-800 border border-white/[0.06] flex items-center justify-center mb-4">
+            <svg className="w-7 h-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-slate-400">No budgets for {period}</p>
+          <p className="text-xs text-slate-600 mt-1">Create a budget to track your spending</p>
         </div>
       ) : (
-        <div className="card space-y-6">
+        <div className="card space-y-5">
           {budgets.map((b: any) => (
             <div key={b.id} className="relative">
               <BudgetBar
@@ -116,7 +121,7 @@ export default function BudgetsPage() {
                 period={period}
               />
               <button
-                className="absolute top-0 right-0 text-xs text-slate-400 hover:text-red-500"
+                className="absolute top-0 right-0 text-[10px] text-slate-600 hover:text-red-400 transition-colors"
                 onClick={() => deleteMut.mutate(b.id)}
               >
                 Remove

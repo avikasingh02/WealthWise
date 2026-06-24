@@ -65,75 +65,98 @@ export default function UploadDropzone() {
   }
 
   return (
-    <div>
-      <div
-        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-          dragging ? 'border-green-400 bg-green-50' : 'border-slate-200 hover:border-green-300 hover:bg-green-50/50'
-        }`}
-        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          className="hidden"
-          onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }}
-        />
+    <div
+      className={`relative border rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 ${
+        dragging
+          ? 'border-cyan-500/50 bg-cyan-500/5 shadow-glow-cyan'
+          : 'border-dashed border-white/[0.1] hover:border-cyan-500/30 hover:bg-white/[0.02]'
+      }`}
+      onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={onDrop}
+      onClick={() => state.status === 'idle' || state.status === 'error' ? inputRef.current?.click() : null}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".csv,.xlsx,.xls"
+        className="hidden"
+        onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }}
+      />
 
-        {state.status === 'idle' && (
-          <>
-            <div className="text-4xl mb-3">📤</div>
-            <p className="font-semibold text-slate-700">Drop your bank statement here</p>
-            <p className="text-sm text-slate-400 mt-1">CSV or XLSX • up to 10 MB</p>
-          </>
-        )}
+      {state.status === 'idle' && (
+        <div className="space-y-3">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+            <svg className="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-300">Drop your bank statement here</p>
+            <p className="text-xs text-slate-600 mt-1">CSV or XLSX • up to 10 MB</p>
+          </div>
+          <p className="text-xs text-slate-700">
+            Supported: HDFC, ICICI, Generic CSV
+          </p>
+        </div>
+      )}
 
-        {state.status === 'uploading' && (
-          <>
-            <div className="text-4xl mb-3 animate-bounce">⬆️</div>
-            <p className="font-semibold text-slate-700">Uploading…</p>
-          </>
-        )}
+      {(state.status === 'uploading' || state.status === 'polling') && (
+        <div className="space-y-3">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+            <svg className="w-7 h-7 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-slate-300">
+            {state.status === 'uploading' ? 'Uploading…' : 'Processing transactions…'}
+          </p>
+          {state.status === 'polling' && (
+            <p className="text-xs text-slate-600">Categorising & deduplicating rows</p>
+          )}
+        </div>
+      )}
 
-        {state.status === 'polling' && (
-          <>
-            <div className="text-4xl mb-3 animate-spin">⚙️</div>
-            <p className="font-semibold text-slate-700">Processing transactions…</p>
-            <p className="text-sm text-slate-400 mt-1">This may take a few seconds</p>
-          </>
-        )}
-
-        {state.status === 'done' && (
-          <>
-            <div className="text-4xl mb-3">✅</div>
-            <p className="font-semibold text-green-700">
-              {state.rowsInserted} transactions imported!
+      {state.status === 'done' && (
+        <div className="space-y-3">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-emerald-400">
+              {state.rowsInserted} transactions imported
             </p>
-            <p
-              className="text-sm text-green-600 mt-2 underline"
+            <button
+              className="text-xs text-slate-500 hover:text-cyan-400 mt-2 underline transition-colors"
               onClick={(e) => { e.stopPropagation(); setState({ status: 'idle' }) }}
             >
               Upload another file
-            </p>
-          </>
-        )}
+            </button>
+          </div>
+        </div>
+      )}
 
-        {state.status === 'error' && (
-          <>
-            <div className="text-4xl mb-3">❌</div>
-            <p className="font-semibold text-red-600">{state.error}</p>
-            <p
-              className="text-sm text-slate-500 mt-2 underline"
+      {state.status === 'error' && (
+        <div className="space-y-3">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+            <svg className="w-7 h-7 text-red-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-red-400">{state.error}</p>
+            <button
+              className="text-xs text-slate-500 hover:text-cyan-400 mt-2 underline transition-colors"
               onClick={(e) => { e.stopPropagation(); setState({ status: 'idle' }) }}
             >
               Try again
-            </p>
-          </>
-        )}
-      </div>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
