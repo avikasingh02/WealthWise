@@ -398,3 +398,4 @@ Interactive docs are available at **http://localhost:3000/api/docs** when the st
 ---
 
 *Built with FastAPI, React, PostgreSQL, Redis, MinIO, and Celery.*
+
